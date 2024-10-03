@@ -6,12 +6,12 @@
 
         private double _previousTargetSetTime;
         private bool _isTargetSet;
-        private object _lockedCandidateTarget;
-        private object _lockedTarget;
-        private object _target;
-        private object _previousTarget;
-        private object _activeTarget;
-        private object _targetInRangeContainer;
+        private dynamic _lockedCandidateTarget;
+        private dynamic _lockedTarget;
+        private dynamic _target;
+        private dynamic _previousTarget;
+        private dynamic _activeTarget;
+        private dynamic _targetInRangeContainer;
 
         public void CleanupTest(Frame frame)
         {
@@ -84,5 +84,7 @@
                 TargetableEntity.Selected = _target;
             }
         }
+
+        // MORE CLASS CODE
     }
 }
