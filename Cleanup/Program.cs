@@ -1,68 +1,76 @@
-﻿namespace Cleanup
+﻿
+using System.Threading;
+
+namespace Cleanup
 {
-    internal class Program
+    // mock frame
+    public interface IFrame
+    {
+        
+    }
+    
+    // mock time 
+    public interface ITime
+    {
+        double time { get; set; }
+    }
+    
+    // mock TargetableEntity
+    public interface ITargetableEntity
+    {
+        ITarget Selected { get; set; }
+    }
+    
+    // mock TargetEntity
+    public interface ITarget 
+    {
+        bool CanBeTarget { get; set; }
+    }
+    
+    public interface ITargetInRangeContainer
+    { 
+        ITarget GetTarget();
+    }
+
+    public class TargetFinder
     {
         private const double TargetChangeTime = 1;
 
-        private double _previousTargetSetTime;
-        private bool _isTargetSet;
-        private dynamic _lockedCandidateTarget;
-        private dynamic _lockedTarget;
-        private dynamic _target;
-        private dynamic _previousTarget;
-        private dynamic _activeTarget;
-        private dynamic _targetInRangeContainer;
+        protected double _previousTargetSetTime;
+        protected bool _isTargetSet;
+        protected dynamic _lockedCandidateTarget;
+        protected dynamic _lockedTarget;
+        protected dynamic _target;
+        protected dynamic _previousTarget;
+        protected dynamic _activeTarget;
+        protected dynamic _targetInRangeContainer;
+        
+        protected IFrame Frame;
+        protected ITargetableEntity TargetableEntity;
+        protected ITime Time;
 
-        public void CleanupTest(Frame frame)
+        private bool CanCleanLockedCandidate => _lockedCandidateTarget != null && !_lockedCandidateTarget.CanBeTarget;
+        private bool CanCleanLocked => _lockedTarget != null && !_lockedTarget.CanBeTarget;
+        public void CleanupTest(IFrame frame)
         {
             try
             {
-                if (_lockedCandidateTarget && !_lockedCandidateTarget.CanBeTarget)
-                {
-                    _lockedCandidateTarget = null;
-                }
-
-                if (_lockedTarget && !_lockedTarget.CanBeTarget)
-                {
-                    _lockedTarget = null;
-                }
-
-                _isTargetSet = false;
-				// Sets _activeTarget field
+                TryCleanLockedTargetAndLockedCandidate();
                 TrySetActiveTargetFromQuantum(frame);
 
-                // If target exists and can be targeted, it should stay within Target Change Time since last target change
-                if (_target && _target.CanBeTarget && Time.time - _previousTargetSetTime < TargetChangeTime)
-                {
-                    _isTargetSet = true;
-                }
+                _isTargetSet = IsCurrentTargetStillExistAndStillActual();
                 _previousTarget = _target;
 
                 if (!_isTargetSet)
                 {
-                    if (_lockedTarget && _lockedTarget.CanBeTarget)
-                    {
-                        _target = _lockedTarget;
-                        _isTargetSet = true;
+                    if (TrySetTargetFrom(_lockedTarget)) 
                         return;
-                    }
-                }
-
-
-                if (!_isTargetSet)
-                {
-                    if (_activeTarget && _activeTarget.CanBeTarget)
-                    {
-                        _target = _activeTarget;
-                        _isTargetSet = true;
+                    
+                    if (TrySetTargetFrom(_activeTarget))
                         return;
-                    }
-                }
-
-                if (!_isTargetSet)
-                {
+                    
                     _target = _targetInRangeContainer.GetTarget();
-                    if (_target)
+                    if (_target != null)
                     {
                         _isTargetSet = true;
                     }
@@ -85,6 +93,49 @@
             }
         }
 
-        // MORE CLASS CODE
+        private bool TrySetTargetFrom(dynamic targetToSet)
+        {
+            if (targetToSet != null && targetToSet.CanBeTarget)
+            {
+                _target = targetToSet;
+                _isTargetSet = true;
+            }
+
+            return _isTargetSet;
+        }
+
+        private bool IsCurrentTargetStillExistAndStillActual()
+        {
+            return _target != null && _target.CanBeTarget && Time.time - _previousTargetSetTime < TargetChangeTime;
+        }
+        
+        private void TryCleanLockedTargetAndLockedCandidate()
+        {
+            if (CanCleanLockedCandidate) 
+                _lockedCandidateTarget = null;
+
+            if (CanCleanLocked)
+                _lockedTarget = null;
+        }
+
+        private void TrySetActiveTargetFromQuantum(IFrame frame)
+        {
+            Frame = frame;
+        }
     }
+    
+    internal class Program
+    {
+        
+        // MORE CLASS CODE
+        public static void Main(string[] args)
+        {
+            // 
+        }
+    }
+    
 }
+
+
+
+
