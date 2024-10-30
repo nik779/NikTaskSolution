@@ -1,30 +1,30 @@
 public class Player
-{
+{ 
+    private const int NewPayerHealth = 100;
+    private const int BaseDamage = 10;
+
     public int Health {
         get; private set;
     }
 
-    public Player(int health) {
-        Health = health;
+    public Player() {
+        Health = NewPlayerHealth;
     }
 
-    public void SetHealth(int value) {
-        Health = value;
+    public void Hit() {
+        Health -= BaseDamage;
     }
 }
 
 class Program
 {
-    private const int NewPayerHealth = 100;
-    private const int Damage = 10;
-
     protected static Player player;
 
     public static void Main(string[] args)
     {
         // Создаем нового игрока.
-        player = new Player(NewPayerHealth);
+        player = new Player();
         // Ударяем игрока.
-        player.SetHealth(player.Health - Damage);
+        player.Hit();
     }
 }
