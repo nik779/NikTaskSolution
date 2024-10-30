@@ -25,6 +25,7 @@ class ExtProgram : Program
 	private static void OnPlayerHealthChanged(int oldHealth, int newHealth)
 	{
 		healthView.Text = newHealth.ToString();
+		// Тут хорошо бы заменить на константу. Например перенести в Player как CriticalHealthChange.
 		if (newHealth - oldHealth < -10) {
 			healthView.Color = Color.Red;
 		} else {

@@ -5,6 +5,7 @@ public class ExtPlayer : Player
 	public event Action Changed {
 		add {
 			innerChanged += value;
+			// Такой подход яваляется плюсом так как при подписке на событие мы сразу инициализируем значение виджета.
 			value();
 		}
 		remove {
