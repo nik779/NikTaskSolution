@@ -51,48 +51,34 @@ namespace Cleanup
 
         private bool CanCleanLockedCandidate => _lockedCandidateTarget != null && !_lockedCandidateTarget.CanBeTarget;
         private bool CanCleanLocked => _lockedTarget != null && !_lockedTarget.CanBeTarget;
+        
         public void CleanupTest(IFrame frame)
         {
             try
             {
                 TryCleanLockedTargetAndLockedCandidate();
                 TrySetActiveTargetFromQuantum(frame);
-
-                _isTargetSet = IsCurrentTargetStillExistAndStillActual();
+                
                 _previousTarget = _target;
-
-                if (!_isTargetSet)
+                if (!IsCurrentTargetStillExistAndStillActual())
                 {
-                    if (TrySetTargetFrom(_lockedTarget)) 
-                        return;
-                    
-                    if (TrySetTargetFrom(_activeTarget))
+                    if (TrySetTargetFrom(_lockedTarget) || TrySetTargetFrom(_activeTarget)) 
                         return;
                     
                     _target = _targetInRangeContainer.GetTarget();
-                    if (_target != null)
-                    {
-                        _isTargetSet = true;
-                    }
+                }
+                else if (_previousTarget != _target)
+                {
+                    _previousTargetSetTime = Time.time;
                 }
             }
             finally
             {
-                if (_isTargetSet)
-                {
-                    if (_previousTarget != _target)
-                    {
-                        _previousTargetSetTime = Time.time;
-                    }
-                }
-                else
-                {
-                    _target = null;
-                }
+                _isTargetSet = _target != null;
                 TargetableEntity.Selected = _target;
             }
         }
-
+        
         private bool TrySetTargetFrom(dynamic targetToSet)
         {
             if (targetToSet != null && targetToSet.CanBeTarget)
@@ -100,7 +86,7 @@ namespace Cleanup
                 _target = targetToSet;
                 _isTargetSet = true;
             }
-
+            
             return _isTargetSet;
         }
 
